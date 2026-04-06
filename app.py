@@ -34,6 +34,7 @@ def process_audio():
             transcription = groq_client.audio.transcriptions.create(
                 file=(filename, f, "audio/m4a"),
                 model="whisper-large-v3",
+                language="en",
             )
         transcript = transcription.text
 
