@@ -55,7 +55,7 @@ Transcript:
 JSON format:
 {{
   "title": "concise title under 60 characters",
-  "summary": "2-3 sentence summary of the key points",
+  "summary": "2-3 sentences that synthesize and condense the core ideas, decisions, or action items. Do NOT repeat or quote the transcript — interpret and distill it.",
   "labels": ["label1", "label2"]
 }}
 
