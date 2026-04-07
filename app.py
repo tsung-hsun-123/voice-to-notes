@@ -10,6 +10,14 @@ app = Flask(__name__)
 groq_client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 anthropic_client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
 
+def clean_and_parse(text):
+    """Strip markdown code blocks and parse JSON from Claude response."""
+    raw = text.strip()
+    raw = raw.replace("```json", "").replace("```", "").strip()
+    if not raw.startswith("{"):
+        raw = "{" + raw
+    return json.loads(raw)
+
 @app.route("/health", methods=["GET"])
 def health():
     return jsonify({"status": "ok"})
@@ -38,15 +46,12 @@ JSON format:
             }
         ]
     )
-    raw = message.content[0].text.strip()
-    if not raw.startswith("{"):
-        raw = "{" + raw
     try:
-        result = json.loads(raw)
+        result = clean_and_parse(message.content[0].text)
         result["transcript"] = transcript
         return jsonify(result)
-    except json.JSONDecodeError:
-        return jsonify({"raw_response": raw, "error": "JSON parse failed"})
+    except json.JSONDecodeError as e:
+        return jsonify({"raw_response": message.content[0].text, "error": str(e)})
 
 @app.route("/process", methods=["POST"])
 def process_audio():
@@ -95,11 +100,7 @@ JSON format:
             ]
         )
 
-        raw = message.content[0].text.strip()
-        raw = raw.replace("```json", "").replace("```", "").strip()
-        if not raw.startswith("{"):
-            raw = "{" + raw
-        result = json.loads(raw)
+        result = clean_and_parse(message.content[0].text)
         result["transcript"] = transcript
 
         return jsonify(result)
