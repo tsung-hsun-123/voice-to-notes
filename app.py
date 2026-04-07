@@ -14,6 +14,40 @@ anthropic_client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY
 def health():
     return jsonify({"status": "ok"})
 
+@app.route("/test", methods=["GET"])
+def test_summarise():
+    transcript = "I need to call John tomorrow about the budget, he mentioned we might be over by 20% and I want to discuss options before the Friday meeting."
+    message = anthropic_client.messages.create(
+        model="claude-haiku-4-5-20251001",
+        max_tokens=1024,
+        messages=[
+            {
+                "role": "user",
+                "content": f"""You are a personal assistant that processes voice notes.
+
+Given this voice note transcript, respond with ONLY valid JSON — no markdown, no code blocks, no explanation.
+
+Transcript:
+{transcript}
+
+JSON format:
+{{
+  "title": "concise title under 60 characters",
+  "summary": "2-3 sentences that synthesize and condense the core ideas, decisions, or action items. Do NOT repeat or quote the transcript — interpret and distill it."
+}}"""
+            }
+        ]
+    )
+    raw = message.content[0].text.strip()
+    if not raw.startswith("{"):
+        raw = "{" + raw
+    try:
+        result = json.loads(raw)
+        result["transcript"] = transcript
+        return jsonify(result)
+    except json.JSONDecodeError:
+        return jsonify({"raw_response": raw, "error": "JSON parse failed"})
+
 @app.route("/process", methods=["POST"])
 def process_audio():
     if "audio" not in request.files:
