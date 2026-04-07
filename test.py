@@ -30,15 +30,15 @@ Transcript:
 JSON format:
 {{
   "title": "concise title under 60 characters",
-  "summary": "2-3 sentences that synthesize and condense the core ideas, decisions, or action items. Do NOT repeat or quote the transcript — interpret and distill it.",
-  "labels": ["label1", "label2"]
-}}
-
-For labels pick 1-3 that best fit from: work, personal, urgent, idea, task, meeting, follow-up, shopping, health, finance, learning"""
+  "summary": "2-3 sentences that synthesize and condense the core ideas, decisions, or action items. Do NOT repeat or quote the transcript — interpret and distill it."
+}}"""
             }
         ]
     )
-    return json.loads(message.content[0].text)
+    raw = message.content[0].text.strip()
+    if not raw.startswith("{"):
+        raw = "{" + raw
+    return json.loads(raw)
 
 
 if __name__ == "__main__":
@@ -50,4 +50,3 @@ if __name__ == "__main__":
 
     print("Title:    ", result["title"])
     print("Summary:  ", result["summary"])
-    print("Labels:   ", result["labels"])

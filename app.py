@@ -55,16 +55,16 @@ Transcript:
 JSON format:
 {{
   "title": "concise title under 60 characters",
-  "summary": "2-3 sentences that synthesize and condense the core ideas, decisions, or action items. Do NOT repeat or quote the transcript — interpret and distill it.",
-  "labels": ["label1", "label2"]
-}}
-
-For labels pick 1-3 that best fit from: work, personal, urgent, idea, task, meeting, follow-up, shopping, health, finance, learning"""
+  "summary": "2-3 sentences that synthesize and condense the core ideas, decisions, or action items. Do NOT repeat or quote the transcript — interpret and distill it."
+}}"""
                 }
             ]
         )
 
-        result = json.loads(message.content[0].text)
+        raw = message.content[0].text.strip()
+        if not raw.startswith("{"):
+            raw = "{" + raw
+        result = json.loads(raw)
         result["transcript"] = transcript
 
         return jsonify(result)
@@ -74,7 +74,6 @@ For labels pick 1-3 that best fit from: work, personal, urgent, idea, task, meet
         return jsonify({
             "title": "Voice Note",
             "summary": transcript[:300],
-            "labels": [],
             "transcript": transcript
         })
 
