@@ -96,6 +96,7 @@ JSON format:
         )
 
         raw = message.content[0].text.strip()
+        raw = raw.replace("```json", "").replace("```", "").strip()
         if not raw.startswith("{"):
             raw = "{" + raw
         result = json.loads(raw)
